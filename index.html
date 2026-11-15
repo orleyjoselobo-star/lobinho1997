@@ -40,6 +40,16 @@
   <div id="pair"></div>
 </div>
 
+<div class="box">
+  <button class="btn-small" style="width:100%;padding:14px" onclick="toggleAdd()">➕ Agregar lista M3U</button>
+  <div id="addBox" style="display:none">
+    <div class="row"><input id="listName" placeholder="Nombre (ej. Latino2)"></div>
+    <div class="row"><input id="listUrl" placeholder="URL M3U (http://...)" autocapitalize="none" autocorrect="off"></div>
+    <label style="display:block;margin-top:8px;color:#9cb6c4;font-size:14px"><input type="checkbox" id="listLoad" checked style="width:auto;margin-right:6px">Cargarla en el TV ahora</label>
+    <div class="row"><button class="btn-small" style="width:100%;padding:14px" onclick="addList()">Enviar al TV</button></div>
+  </div>
+</div>
+
 <div class="pad">
   <div></div><button class="rc" onclick="key('up')">▲</button><div></div>
   <button class="rc" onclick="key('left')">◀</button><button class="rc" onclick="key('ok')">OK</button><button class="rc" onclick="key('right')">▶</button>
@@ -74,6 +84,16 @@ function sendVoice(text) { statusEl.textContent = 'Enviado: "' + text + '"'; sen
 function sendText() {
   var t = document.getElementById("textInput").value.trim();
   if (t) { sendVoice(t); document.getElementById("textInput").value = ""; }
+}
+
+function toggleAdd() { var b = document.getElementById("addBox"); b.style.display = b.style.display === "none" ? "block" : "none"; }
+function addList() {
+  var name = document.getElementById("listName").value.trim();
+  var url = document.getElementById("listUrl").value.trim();
+  if (!/^https?:\/\//i.test(url)) { statusEl.textContent = "La URL debe empezar con http:// o https://"; return; }
+  send({ type: "addlist", name: name, url: url, load: document.getElementById("listLoad").checked });
+  statusEl.textContent = 'Lista "' + (name || "Lista móvil") + '" enviada al TV';
+  document.getElementById("listName").value = ""; document.getElementById("listUrl").value = "";
 }
 
 function startVoice() {
