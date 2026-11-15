@@ -7,99 +7,170 @@
 <style>
   :root { --cy:#12b2e7; --bg:#07131a; --card:#0d2b3a; }
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { background:var(--bg); color:#fff; font-family:'Segoe UI',Roboto,sans-serif; display:flex; flex-direction:column; align-items:center; padding:20px; min-height:100vh; }
-  h2 { color:var(--cy); margin-bottom:14px; font-weight:400; }
-  .box { width:100%; max-width:350px; margin-bottom:18px; }
-  input { width:100%; padding:14px; border-radius:10px; border:2px solid #1b4458; background:#04101a; color:#fff; font-size:16px; }
-  .row { display:flex; margin-top:8px; }
+  body { background:var(--bg); color:#fff; font-family:'Segoe UI',Roboto,sans-serif; display:flex; flex-direction:column; align-items:center; padding:16px; min-height:100vh; }
+  h2 { color:var(--cy); margin-bottom:10px; font-weight:400; }
+  .box { width:100%; max-width:380px; margin-bottom:14px; }
+  input[type=text], input:not([type]) { width:100%; padding:13px; border-radius:10px; border:2px solid #1b4458; background:#04101a; color:#fff; font-size:16px; }
+  .row { display:flex; margin-top:8px; align-items:center; }
   .row input { flex:1; margin-right:8px; }
-  .btn-voice, .btn-small { border:none; font-weight:bold; border-radius:12px; cursor:pointer; color:#041016; background:linear-gradient(135deg,#12b2e7,#097498); }
-  .btn-voice { width:100%; padding:18px; font-size:18px; box-shadow:0 5px 15px rgba(18,178,231,.4); }
-  .btn-small { padding:0 18px; font-size:16px; }
-  .btn-voice.listening { background:linear-gradient(135deg,#e74c3c,#a62b1f); color:#fff; }
-  #status { margin-top:10px; font-size:15px; color:#9cb6c4; text-align:center; min-height:22px; }
-  .pad { display:grid; grid-template-columns:repeat(3,1fr); grid-gap:12px; width:100%; max-width:350px; }
-  .rc { background:var(--card); color:#fff; border:2px solid #1b4458; padding:20px 0; font-size:20px; border-radius:12px; cursor:pointer; }
-  .rc:active { background:var(--cy); color:#041016; }
+  button { font-family:inherit; cursor:pointer; }
+  .btn-main, .btn-small { border:none; font-weight:bold; border-radius:12px; color:#041016; background:linear-gradient(135deg,#12b2e7,#097498); }
+  .btn-main { width:100%; padding:16px; font-size:18px; box-shadow:0 5px 15px rgba(18,178,231,.4); }
+  .btn-main.listening { background:linear-gradient(135deg,#e74c3c,#a62b1f); color:#fff; }
+  .btn-small { padding:0 16px; height:46px; font-size:16px; }
+  #status { margin-top:8px; font-size:14px; color:#9cb6c4; text-align:center; min-height:20px; }
+  #now { background:var(--card); border:2px solid #1b4458; border-radius:12px; padding:12px; text-align:center; font-size:15px; }
+  #now b { color:var(--cy); display:block; font-size:17px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tabs { display:flex; width:100%; max-width:380px; margin-bottom:12px; }
+  .tab { flex:1; padding:11px 0; background:#0a1f2b; color:#9cb6c4; border:none; font-size:15px; }
+  .tab:first-child { border-radius:10px 0 0 10px; } .tab:last-child { border-radius:0 10px 10px 0; }
+  .tab.on { background:var(--cy); color:#041016; font-weight:bold; }
+  .pane { display:none; width:100%; max-width:380px; } .pane.on { display:block; }
+  .pad { display:grid; grid-template-columns:repeat(3,1fr); grid-gap:10px; }
+  .rc { background:var(--card); color:#fff; border:2px solid #1b4458; padding:16px 0; font-size:18px; border-radius:12px; }
+  .rc:active, .item button:active { background:var(--cy); color:#041016; }
   .full { grid-column:span 3; }
-  #pair { font-size:12px; color:#5f7f8f; margin-top:6px; text-align:center; }
+  .sec { color:#9cb6c4; font-size:14px; margin:14px 0 6px; }
+  .item { display:flex; align-items:center; background:var(--card); border:2px solid #1b4458; border-radius:10px; padding:8px 10px; margin-bottom:6px; }
+  .item.act { border-color:var(--cy); }
+  .item span { flex:1; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .item button { margin-left:6px; padding:8px 12px; border-radius:8px; border:1px solid #2b4c5e; background:#12303f; color:#fff; font-size:14px; }
+  .item button.del { background:#8b1e24; border-color:#8b1e24; }
+  .empty { color:#5f7f8f; font-size:14px; padding:6px; }
+  #pair { font-size:12px; color:#5f7f8f; margin-top:8px; text-align:center; }
 </style>
 </head>
 <body>
 <h2>🐺 LoboTV Control</h2>
 
 <div class="box" id="pairBox" style="display:none">
-  <div style="margin-bottom:6px;color:#9cb6c4">Código que aparece en ⚙ Configuración del TV:</div>
+  <div style="margin-bottom:6px;color:#9cb6c4">Código que aparece en el TV (⚙ Configuración):</div>
   <div class="row"><input id="codeInput" placeholder="lobotv-xxxxxxxxxxxx"><button class="btn-small" onclick="savePair()">OK</button></div>
 </div>
 
-<div class="box">
-  <button class="btn-voice" id="micBtn" onclick="startVoice()">🎙️ Buscar por voz</button>
-  <div class="row"><input id="textInput" placeholder="o escribe: pon Avengers"><button class="btn-small" onclick="sendText()">▶</button></div>
-  <div id="status">Di por ejemplo: “busca película Avengers” o “pon canal Caracol”</div>
-  <div id="pair"></div>
+<div class="box" id="now">Esperando al TV...</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="tab(0)">🎮 Mando</button>
+  <button class="tab" onclick="tab(1)">📋 Listas</button>
+  <button class="tab" onclick="tab(2)">⭐ Mis cosas</button>
 </div>
 
-<div class="box">
-  <button class="btn-small" style="width:100%;padding:14px" onclick="toggleAdd()">➕ Agregar lista M3U</button>
-  <div id="addBox" style="display:none">
-    <div class="row"><input id="listName" placeholder="Nombre (ej. Latino2)"></div>
-    <div class="row"><input id="listUrl" placeholder="URL M3U (http://...)" autocapitalize="none" autocorrect="off"></div>
-    <label style="display:block;margin-top:8px;color:#9cb6c4;font-size:14px"><input type="checkbox" id="listLoad" checked style="width:auto;margin-right:6px">Cargarla en el TV ahora</label>
-    <div class="row"><button class="btn-small" style="width:100%;padding:14px" onclick="addList()">Enviar al TV</button></div>
+<div class="pane on" id="p0">
+  <button class="btn-main" id="micBtn" onclick="startVoice()">🎙️ Buscar por voz</button>
+  <div class="row"><input id="textInput" placeholder="o escribe: pon Avengers"><button class="btn-small" onclick="sendText()">▶</button></div>
+  <div id="status">Di: “busca película Avengers” o “pon canal Caracol”</div>
+
+  <div class="sec">Reproducción</div>
+  <div class="pad">
+    <button class="rc" onclick="play('seek',-10)">⏪ 10s</button><button class="rc" id="ppBtn" onclick="play('pp')">⏯</button><button class="rc" onclick="play('seek',10)">10s ⏩</button>
+    <button class="rc" onclick="play('prev')">⏮ Anterior</button><button class="rc" onclick="play('stop')">⏹</button><button class="rc" onclick="play('next')">Siguiente ⏭</button>
+  </div>
+
+  <div class="sec">Navegación</div>
+  <div class="pad">
+    <div></div><button class="rc" onclick="key('up')">▲</button><div></div>
+    <button class="rc" onclick="key('left')">◀</button><button class="rc" onclick="key('ok')">OK</button><button class="rc" onclick="key('right')">▶</button>
+    <div></div><button class="rc" onclick="key('down')">▼</button><div></div>
+    <button class="rc" onclick="key('settings')">⚙</button><button class="rc" onclick="key('search')">🔍</button><button class="rc" onclick="key('fav')">⭐</button>
+    <button class="rc full" onclick="key('back')">Volver / Atrás</button>
   </div>
 </div>
 
-<div class="pad">
-  <div></div><button class="rc" onclick="key('up')">▲</button><div></div>
-  <button class="rc" onclick="key('left')">◀</button><button class="rc" onclick="key('ok')">OK</button><button class="rc" onclick="key('right')">▶</button>
-  <div></div><button class="rc" onclick="key('down')">▼</button><div></div>
-  <button class="rc" onclick="key('settings')">⚙</button><button class="rc" onclick="key('search')">🔍</button><button class="rc" onclick="key('fav')">⭐</button>
-  <button class="rc full" onclick="key('back')">Volver / Atrás</button>
+<div class="pane" id="p1">
+  <div class="sec" style="margin-top:0">Listas guardadas en el TV</div>
+  <div id="listsBox"><div class="empty">Esperando al TV...</div></div>
+  <div class="sec">➕ Agregar lista M3U</div>
+  <div class="row"><input id="listName" placeholder="Nombre (ej. Latino2)"></div>
+  <div class="row"><input id="listUrl" placeholder="URL M3U (http://...)" autocapitalize="none" autocorrect="off"></div>
+  <label style="display:block;margin-top:8px;color:#9cb6c4;font-size:14px"><input type="checkbox" id="listLoad" checked style="width:auto;margin-right:6px">Cargarla en el TV ahora</label>
+  <div class="row"><button class="btn-main" style="padding:13px;font-size:16px" onclick="addList()">Enviar al TV</button></div>
 </div>
+
+<div class="pane" id="p2">
+  <div class="sec" style="margin-top:0">⭐ Favoritos</div>
+  <div id="favsBox"><div class="empty">Esperando al TV...</div></div>
+  <div class="sec">🕘 Seguir viendo</div>
+  <div id="histBox"><div class="empty">Esperando al TV...</div></div>
+</div>
+
+<div id="pair"></div>
 
 <script>
 var code = (location.hash || "").slice(1) || localStorage.getItem("lobotv_pair") || "";
-var statusEl = document.getElementById("status");
+var statusEl = document.getElementById("status"), es = null;
 
+function $(id) { return document.getElementById(id); }
+function tab(n) {
+  for (var i = 0; i < 3; i++) { $("p" + i).classList.toggle("on", i === n); document.querySelectorAll(".tab")[i].classList.toggle("on", i === n); }
+}
 function refreshPair() {
   if (code) localStorage.setItem("lobotv_pair", code);
-  document.getElementById("pairBox").style.display = code ? "none" : "block";
-  document.getElementById("pair").textContent = code ? "Emparejado: " + code + " (toca para cambiar)" : "";
+  $("pairBox").style.display = code ? "none" : "block";
+  $("pair").textContent = code ? "Emparejado: " + code + " (toca para cambiar)" : "";
+  connectState();
 }
-document.getElementById("pair").onclick = function () { code = ""; localStorage.removeItem("lobotv_pair"); history.replaceState(null, "", location.pathname); refreshPair(); };
-function savePair() {
-  var v = document.getElementById("codeInput").value.trim();
-  if (v) { code = v; refreshPair(); }
-}
+$("pair").onclick = function () { code = ""; localStorage.removeItem("lobotv_pair"); history.replaceState(null, "", location.pathname); if (es) { es.close(); es = null; } refreshPair(); };
+function savePair() { var v = $("codeInput").value.trim(); if (v) { code = v; refreshPair(); send({ type: "hello" }); } }
 
-function send(payload) {
+function send(p) {
   if (!code) { statusEl.textContent = "Primero escribe el código del TV."; refreshPair(); return; }
-  payload.time = Date.now();
-  fetch("https://ntfy.sh/" + encodeURIComponent(code), { method: "POST", body: JSON.stringify(payload) })
+  p.time = Date.now();
+  fetch("https://ntfy.sh/" + encodeURIComponent(code), { method: "POST", body: JSON.stringify(p) })
     .catch(function () { statusEl.textContent = "Sin conexión a internet."; });
 }
-function key(action) { send({ type: "key", action: action }); }
-function sendVoice(text) { statusEl.textContent = 'Enviado: "' + text + '"'; send({ type: "voice", query: text }); }
-function sendText() {
-  var t = document.getElementById("textInput").value.trim();
-  if (t) { sendVoice(t); document.getElementById("textInput").value = ""; }
+function key(a) { send({ type: "key", action: a }); }
+function play(a, s) { send({ type: "play", action: a, s: s }); }
+function sendVoice(t) { statusEl.textContent = 'Enviado: "' + t + '"'; send({ type: "voice", query: t }); }
+function sendText() { var t = $("textInput").value.trim(); if (t) { sendVoice(t); $("textInput").value = ""; } }
+
+// ---------- Estado que llega desde el TV ----------
+function connectState() {
+  if (!code || es) return;
+  es = new EventSource("https://ntfy.sh/" + encodeURIComponent(code) + "-tv/sse?since=latest");
+  es.onmessage = function (ev) {
+    try { var m = JSON.parse(ev.data); if (m.event === "message") render(JSON.parse(m.message)); } catch (e) { }
+  };
+}
+function mk(tag, text, cls, fn) { var e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; if (fn) e.onclick = fn; return e; }
+function fillList(box, names, active, actions, emptyMsg) {
+  box.innerHTML = "";
+  if (!names || !names.length) { box.appendChild(mk("div", emptyMsg, "empty")); return; }
+  names.forEach(function (n, i) {
+    var it = mk("div", "", "item" + (i === active ? " act" : ""));
+    it.appendChild(mk("span", (i === active ? "▶ " : "") + n));
+    actions.forEach(function (a) { it.appendChild(mk("button", a.t, a.c, function () { a.f(i, n); })); });
+    box.appendChild(it);
+  });
+}
+function render(s) {
+  var now = $("now");
+  now.innerHTML = "";
+  if (s.now) { now.appendChild(document.createTextNode(s.now.paused ? "⏸ En pausa" : "▶ Reproduciendo")); now.appendChild(mk("b", s.now.t)); }
+  else now.textContent = "📺 Nada en reproducción";
+  $("ppBtn").textContent = (s.now && s.now.paused) ? "▶" : "⏸";
+  fillList($("listsBox"), s.lists, s.active, [
+    { t: "Cargar", f: function (i) { send({ type: "select", i: i }); } },
+    { t: "🗑", c: "del", f: function (i, n) { if (confirm('¿Eliminar la lista "' + n + '"?')) send({ type: "dellist", i: i }); } }
+  ], "No hay listas.");
+  fillList($("favsBox"), s.favs, -1, [{ t: "▶", f: function (i) { send({ type: "playfav", i: i }); } }], "Aún no tienes favoritos.");
+  fillList($("histBox"), s.hist, -1, [{ t: "▶", f: function (i) { send({ type: "playhist", i: i }); } }], "Nada por seguir viendo.");
 }
 
-function toggleAdd() { var b = document.getElementById("addBox"); b.style.display = b.style.display === "none" ? "block" : "none"; }
+// ---------- Agregar lista ----------
 function addList() {
-  var name = document.getElementById("listName").value.trim();
-  var url = document.getElementById("listUrl").value.trim();
-  if (!/^https?:\/\//i.test(url)) { statusEl.textContent = "La URL debe empezar con http:// o https://"; return; }
-  send({ type: "addlist", name: name, url: url, load: document.getElementById("listLoad").checked });
-  statusEl.textContent = 'Lista "' + (name || "Lista móvil") + '" enviada al TV';
-  document.getElementById("listName").value = ""; document.getElementById("listUrl").value = "";
+  var name = $("listName").value.trim(), url = $("listUrl").value.trim();
+  if (!/^https?:\/\//i.test(url)) { alert("La URL debe empezar con http:// o https://"); return; }
+  send({ type: "addlist", name: name, url: url, load: $("listLoad").checked });
+  $("listName").value = ""; $("listUrl").value = "";
+  alert('Lista "' + (name || "Lista móvil") + '" enviada al TV');
 }
 
+// ---------- Voz ----------
 function startVoice() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { statusEl.textContent = "Este navegador no tiene voz. Usa Chrome (Android) o el micrófono del teclado en el cuadro de texto."; return; }
-  var rec = new SR(), btn = document.getElementById("micBtn");
+  if (!SR) { statusEl.textContent = "Este navegador no tiene voz. Usa Chrome (Android) o el micrófono del teclado."; return; }
+  var rec = new SR(), btn = $("micBtn");
   rec.lang = "es-CO"; rec.interimResults = false; rec.maxAlternatives = 1;
   rec.onstart = function () { btn.classList.add("listening"); statusEl.textContent = "Escuchando..."; };
   rec.onend = function () { btn.classList.remove("listening"); };
@@ -107,7 +178,9 @@ function startVoice() {
   rec.onerror = function (e) { statusEl.textContent = e.error === "not-allowed" ? "Permite el micrófono en el navegador." : "No te entendí, intenta de nuevo."; };
   rec.start();
 }
+
 refreshPair();
+if (code) send({ type: "hello" });
 </script>
 </body>
 </html>
